@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>06</title>
+
+<!--
+  =====================================================================
+  HOW TO USE THIS
+  =====================================================================
+  This page shows ONE full-screen video or image, edge-to-edge, with
+  no other content — good for a tag that just needs to show a single
+  piece rather than a whole bio page.
+
+  1. Copy this file and rename it, e.g. entrance-loop.html
+  2. Scroll to the "EDIT ME" block near the bottom.
+  3. Set type to "video" or "image" and point src at your file.
+  4. Put the media file in the /media folder (or reuse /images).
+  5. Push to GitHub, confirm GitHub Pages is on, and encode this
+     page's live URL onto its tag — same as the artist pages.
+  =====================================================================
+-->
+
+<style>
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html, body{
+    width:100%; height:100%;
+    background:#000;
+    overflow:hidden;
+    /* stop the little bounce/scroll on iOS */
+    overscroll-behavior:none;
+  }
+
+  .stage{
+    position:fixed;
+    inset:0;
+    width:100vw;
+    height:100vh;
+    /* fall back for older browsers that don't support dvh */
+    height:100dvh;
+  }
+
+  .stage video,
+  .stage img{
+    width:100%;
+    height:100%;
+    display:block;
+  }
+  .stage.fit-cover video,
+  .stage.fit-cover img{
+    object-fit: cover;
+  }
+  .stage.fit-contain video,
+  .stage.fit-contain img{
+    object-fit: contain;
+    background:#000;
+  }
+
+  /* shown briefly only if the browser blocks autoplay and the
+     video needs a tap to start */
+  .tap-hint{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: rgba(0,0,0,0.35);
+    color:#fff;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 300ms ease;
+  }
+  .tap-hint.is-visible{
+    opacity:1;
+    pointer-events:auto;
+  }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage"></div>
+<div class="tap-hint" id="tapHint">Tap to play</div>
+
+<script>
+/* =====================================================================
+   EDIT ME — the only thing you need to change per tag
+   ===================================================================== */
+const MEDIA = {
+
+  // "video" or "image"
+  type: "video",
+
+  // Path to the file. Keep videos short and compressed (a few MB,
+  // not hundreds) so it starts instantly on mobile data.
+  src: "media/06.mp4",
+
+  // "cover" fills the whole phone screen edge-to-edge, cropping the
+  // sides — best for portrait pieces.
+  // "contain" shows the whole image/video with black bars added
+  // top/bottom or left/right — best for landscape pieces, since
+  // nothing gets cropped off.
+  fit: "cover",
+
+  // Only used when type is "video":
+  loop: true,     // repeat forever, seamlessly
+  muted: true,    // required for autoplay to work on phones
+  autoplay: true
+
+};
+/* ===================================================================== */
+
+
+const stage = document.getElementById('stage');
+stage.classList.add(MEDIA.fit === 'contain' ? 'fit-contain' : 'fit-cover');
+const tapHint = document.getElementById('tapHint');
+
+if (MEDIA.type === 'video'){
+  const video = document.createElement('video');
+  video.src = MEDIA.src;
+  video.loop = MEDIA.loop;
+  video.muted = MEDIA.muted;
+  video.playsInline = true;        // required to avoid fullscreen takeover on iOS
+  video.setAttribute('webkit-playsinline', 'true');
+  video.autoplay = MEDIA.autoplay;
+  video.controls = false;
+  video.setAttribute('disablepictureinpicture', '');
+  stage.appendChild(video);
+
+  const tryPlay = () => video.play().catch(() => {
+    // Some browsers still block autoplay even when muted — show a
+    // tap-to-play hint as a fallback rather than a stuck black screen.
+    tapHint.classList.add('is-visible');
+  });
+  tryPlay();
+
+  tapHint.addEventListener('click', () => {
+    video.play();
+    tapHint.classList.remove('is-visible');
+  });
+
+} else {
+  const img = document.createElement('img');
+  img.src = MEDIA.src;
+  img.alt = "";
+  stage.appendChild(img);
+}
+</script>
+
+</body>
+</html>
